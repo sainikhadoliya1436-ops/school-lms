@@ -7,7 +7,12 @@
   "theme_color": "#0284c7",
   "icons": [
     {
-      "src": "https://via.placeholder.com/512",
+      "src": "./192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
