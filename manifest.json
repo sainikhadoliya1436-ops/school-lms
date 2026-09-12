@@ -1,6 +1,6 @@
 {
-  "name": "Smart School LMS",
-  "short_name": "SmartLMS",
+  "name": "LearnWithSK",
+  "short_name": "LearnWithSK",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
