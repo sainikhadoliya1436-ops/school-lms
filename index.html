@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart School LMS App</title>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0284c7">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+      padding-bottom: 70px;
+    }
+    .hidden { display: none !important; }
+    
+    header {
+      background: #1f1f1f;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+    header h2 { font-size: 1rem; margin: 0; color: #38bdf8; }
+    #logout-btn {
+      background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;
+    }
+
+    #auth-container {
+      max-width: 350px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: #2a2a2a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover { background: #2563eb; }
+    .switch-auth { text-align: center; margin-top: 15px; font-size: 0.9rem; color: #94a3b8; cursor: pointer; }
+
+    .tab-content { padding: 15px; }
+    .card {
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      border: 1px solid #2a2a2a;
+      margin-bottom: 15px;
+    }
+    .card h3 { margin-top: 0; color: #38bdf8; font-size: 1.1rem; }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: #18181b;
+      border-top: 1px solid #27272a;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+    }
+    .nav-item {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .nav-item.active { color: #38bdf8; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <!-- Authentication Container -->
+  <div id="auth-container">
+    <h2 id="auth-title" style="text-align: center; color: #38bdf8; margin-top: 0;">Student Portal Login</h2>
+    <input type="email" id="email" placeholder="Enter Email">
+    <input type="password" id="password" placeholder="Enter Password">
+    
+    <!-- Extra Fields for Sign Up (Class & Medium) -->
+    <div id="signup-extra-fields" class="hidden">
+      <label style="font-size: 0.85rem; color: #94a3b8;">Select Class:</label>
+      <select id="student-class">
+        <option value="Class 9">Class 9</option>
+        <option value="Class 10">Class 10</option>
+        <option value="Class 11">Class 11</option>
+        <option value="Class 12">Class 12</option>
+      </select>
+
+      <label style="font-size: 0.85rem; color: #94a3b8;">Select Medium:</label>
+      <select id="student-medium">
+        <option value="English">English Medium</option>
+        <option value="Hindi">हिंदी माध्यम (Hindi Medium)</option>
+      </select>
+    </div>
+
+    <button id="auth-btn" class="btn">Login</button>
+    <p id="auth-switch" class="switch-auth">Don't have an account? Sign Up</p>
+    <p id="auth-error" style="color: #ef4444; font-size: 0.85rem; text-align: center; margin-top: 10px;"></p>
+  </div>
+
+  <!-- Main Dashboard App -->
+  <div id="dashboard-container" class="hidden">
+    <header>
+      <h2><span id="user-class-display"></span> | <span id="user-email"></span></h2>
+      <button id="logout-btn">Logout</button>
+    </header>
+
+    <!-- TAB 1: Home / Score Submission -->
+    <div id="view-home" class="tab-content">
+      <div class="card">
+        <h3>Submit Test Score</h3>
+        <input type="number" id="test-score" placeholder="Enter score (0-100)">
+        <button id="submit-score-btn" class="btn">Submit Score</button>
+      </div>
+    </div>
+
+    <!-- TAB 2: Study Notes (Class & Medium Wise) -->
+    <div id="view-notes" class="tab-content hidden">
+      <div class="card">
+        <h3>Chapter Notes (<span id="notes-medium-label">English</span>)</h3>
+        <select id="notes-subject-select">
+          <option value="Math">Mathematics / गणित</option>
+          <option value="Science">Science / विज्ञान</option>
+          <option value="English">English / हिंदी</option>
+        </select>
+        <div id="notes-content" style="margin-top: 15px; padding: 12px; background: #121212; border-radius: 6px; font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; white-space: pre-line;">
+          Loading notes...
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Subject Quiz / Mock Test -->
+    <div id="view-quiz" class="tab-content hidden">
+      <div class="card">
+        <h3>Mock Test & Quiz</h3>
+        <select id="subject-select">
+          <option value="Math">Mathematics</option>
+          <option value="Science">Science</option>
+          <option value="English">English</option>
+        </select>
+        <p id="quiz-question" style="margin: 15px 0; font-weight: bold; font-size: 1rem;">Q: Loading...</p>
+        <input type="text" id="quiz-answer" placeholder="Enter your answer">
+        <button id="submit-quiz-btn" class="btn">Submit Answer</button>
+        <p id="quiz-feedback" style="margin-top: 12px; font-size: 0.9rem; color: #38bdf8;"></p>
+      </div>
+    </div>
+
+    <!-- TAB 4: AI Study Assistant -->
+    <div id="view-ai" class="tab-content hidden">
+      <div class="card">
+        <h3>AI Study Assistant</h3>
+        <input type="text" id="ai-question-input" placeholder="Ask your study doubt in Hindi or English...">
+        <button id="ask-ai-btn" class="btn">Ask AI</button>
+        <div id="ai-response-box" style="margin-top: 15px; padding: 12px; background: #121212; border-radius: 6px; font-size: 0.9rem; line-height: 1.5; color: #38bdf8; min-height: 50px;">
+          AI is ready to clear your doubts!
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: Leaderboard -->
+    <div id="view-leaderboard" class="tab-content hidden">
+      <div class="card">
+        <h3>Class Leaderboard</h3>
+        <ul id="leaderboard-list" style="list-style: none; padding: 0; margin-top: 10px;">
+          <li style="padding: 8px 0;">Loading rankings...</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('home', this)">🏠 Home</button>
+      <button class="nav-item" onclick="switchTab('notes', this)">📖 Notes</button>
+      <button class="nav-item" onclick="switchTab('quiz', this)">✍️ Quiz</button>
+      <button class="nav-item" onclick="switchTab('ai'
+, this)">🤖 AI Tutor</button>
+      <button class="nav-item" onclick="switchTab('leaderboard', this)">🏆 Ranks</button>
+    </nav>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
